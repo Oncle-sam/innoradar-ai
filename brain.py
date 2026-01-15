@@ -15,12 +15,17 @@ def get_model():
     api_key = st.secrets.get("GEMINI_API_KEY")
     genai.configure(api_key=api_key)
     
-    # On reste sur le modèle Pro qui a été détecté avec succès
-    model_name = 'gemini-1.5-pro'
+    # On essaie le nom le plus simple (souvent mappé sur la version stable v1)
+    # Si 'gemini-pro' échoue, essayez 'gemini-1.5-flash'
+    model_name = 'gemini-pro' 
     
-    # IMPORTANT : On n'utilise PAS system_instruction ici pour éviter le crash
-    model = genai.GenerativeModel(model_name=model_name)
-    return model, model_name
+    try:
+        model = genai.GenerativeModel(model_name=model_name)
+        # On ne fait pas de test de génération ici pour éviter le crash immédiat
+        return model, model_name
+    except Exception as e:
+        raise Exception(f"Erreur lors de l'initialisation : {e}")
+
 
 def generate_response(model, prompt, history):
     # On construit le prompt en mettant le framework AU DÉBUT
