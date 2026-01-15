@@ -9,6 +9,39 @@ apply_styles()
 st.title("InnoRadar")
 st.write("L'outil IA de matchmaking parfait connectant les acteurs du sport aux innovations vraiment utiles.")
 
+
+import streamlit as st
+
+st.set_page_config(page_title="InnoRadar", page_icon="🎯", layout="wide")
+
+# Injection de l'identité visuelle (Violet & Void)
+st.markdown("""
+    <style>
+    /* Fond principal */
+    .stApp {
+        background-color: #0f1025;
+        color: #f8fafc;
+    }
+    /* Style des questions de l'IA (Bulles) */
+    .stChatMessage {
+        background: rgba(26, 27, 59, 0.6) !important;
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+    }
+    /* Titre InnoRadar */
+    .main-title {
+        font-family: 'Exo 2', sans-serif;
+        font-weight: 800;
+        background: linear-gradient(90deg, #8b5cf6, #60a5fa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 3rem;
+    }
+    </style>
+    <h1 class="main-title">INNORADAR</h1>
+    """, unsafe_allow_html=True)
+
 # Initialisation du modèle
 try:
 # Modifiez cette ligne pour "déballer" le tuple
