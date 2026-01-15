@@ -12,9 +12,28 @@ def get_model():
     model = genai.GenerativeModel(model_name=model_name)
     return model, model_name
 
+import pandas as pd
+
+def load_solutions():
+    try:
+        # On charge la base de données Sport Tech
+        df = pd.read_csv("solutions.csv")
+        # On transforme le tableau en texte pour l'IA
+        return df.to_string(index=False)
+    except:
+        return "Aucune base de données de solutions disponible pour le moment."
+
 def generate_response(model, prompt, history):
-    # On inclut le Framework InnoRadar directement ici
-    system_instructions = """
+    solutions_data = load_solutions()
+    
+    system_instructions = f"""
+    Tu es l'intelligence centrale d'InnoRadar.
+    Voici la base de données des solutions Sport Tech disponibles :
+    {solutions_data}
+    
+    CONSIGNE : Utilise UNIQUEMENT ces solutions pour tes recommandations.
+    Si une solution n'est pas dans la liste, précise que tu ne l'as pas encore référencée.
+
     Tu es l'intelligence centrale d'InnoRadar, expert en Sport Tech.
     Ton rôle est de diagnostiquer les besoins B2B et de proposer des solutions précises.
     MÉTHODE : Pose 5 questions clés avant de conclure.
@@ -31,3 +50,5 @@ def generate_response(model, prompt, history):
     # Appel de génération
     response = model.generate_content(full_prompt)
     return response.text
+
+
