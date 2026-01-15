@@ -27,13 +27,25 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+
 # 2. Sécurité & Modèle
 api_key = st.secrets.get("GEMINI_API_KEY")
 if not api_key:
     st.error("Clé API manquante. Configurez GEMINI_API_KEY dans les secrets.")
     st.stop()
 
+# 1. Configuration de l'API (forcez la configuration globale)
 genai.configure(api_key=api_key)
+
+# 2. Testez ce nom de modèle précis (sans le préfixe models/ cette fois, 
+# car la bibliothèque l'ajoute parfois d'elle-même selon la version)
+MODEL_NAME = 'gemini-1.5-flash-latest' 
+
+model = genai.GenerativeModel(
+    model_name=MODEL_NAME,
+    generation_config=generation_config,
+    system_instruction=SYSTEM_PROMPT
+)
 
 # Configuration selon AI Studio
 generation_config = {
@@ -56,12 +68,6 @@ MÉTHODOLOGIE :
    - Faisabilité (Mode éco + temps d'implémentation)
 3. Produit Signature : Si besoin complexe, propose "InnoRadar AI Factory".
 """
-
-model = genai.GenerativeModel(
-    model_name='models/gemini-1.5-flash',
-    generation_config=generation_config,
-    system_instruction=SYSTEM_PROMPT
-)
 
 # 4. Interface Chat
 
