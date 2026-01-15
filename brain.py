@@ -32,27 +32,17 @@ def get_model():
     api_key = st.secrets.get("GEMINI_API_KEY")
     genai.configure(api_key=api_key)
     
-    # Liste de noms de modèles à tester par ordre de priorité
-    model_variants = [
-        'gemini-1.5-flash',
-        'gemini-1.5-flash-latest',
-        'models/gemini-1.5-flash'
-    ]
-    
-    for name in model_variants:
-        try:
-            model = genai.GenerativeModel(model_name=name)
-            # Test de connexion rapide
-            model.generate_content("ping", generation_config={"max_output_tokens": 1})
-            return model, name
-        except Exception:
-            continue
-            
-    # Si aucun ne fonctionne, on tente le modèle Pro
+    # ÉTAPE A : Lister les modèles autorisés pour CETTE clé sur CE serveur
     try:
-        return genai.GenerativeModel(model_name='gemini-1.5-pro'), "gemini-1.5-pro"
+        available_models = [m.name for m in genai.list_models()]
+        st.sidebar.write("Modèles détectés :", available_models)
     except Exception as e:
-        raise Exception(f"Aucun modèle Gemini n'est accessible avec cette clé : {e}")
+        st.sidebar.error(f"Impossible de lister les modèles : {e}")
+        available_models = []
+
+    # ÉTAPE B : Essayer le modèle le plus basique possible
+    model_name = 'gemini-pro' # Le plus ancien/stable
+    return genai.GenerativeModel(model_name=model_name), model_name
 
 def generate_response(model, prompt, history):
     # On prépare le contexte avec l'historique pour que l'IA ait de la mémoire
