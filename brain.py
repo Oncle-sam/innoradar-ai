@@ -55,15 +55,20 @@ def get_model():
         raise Exception(f"Aucun modèle Gemini n'est accessible avec cette clé : {e}")
 
 def generate_response(model, prompt, history):
-    # Injection du System Prompt dans chaque requête pour garantir le comportement
-    full_prompt = f"{SYSTEM_PROMPT}\n\nHistorique: {history}\n\nUtilisateur: {prompt}"
+    # On prépare le contexte avec l'historique pour que l'IA ait de la mémoire
+    context = ""
+    for msg in history[-5:]: # On prend les 5 derniers messages pour la mémoire
+        context += f"{msg['role']}: {msg['content']}\n"
     
+    full_prompt = f"{SYSTEM_PROMPT}\n\nHistorique récent:\n{context}\n\nUtilisateur: {prompt}"
+    
+    # Appel critique : 'model' doit être l'objet, pas le tuple
     response = model.generate_content(
         full_prompt,
         generation_config={
             "temperature": 0.5,
             "top_p": 0.9,
-            "max_output_tokens": 4000,
+            "max_output_tokens": 2000,
         }
     )
     return response.text
