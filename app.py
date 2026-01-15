@@ -1,82 +1,94 @@
 import streamlit as st
 import google.generativeai as genai
 
-# --- CONFIGURATION DE L'IA ---
-# On récupère la clé de manière sécurisée (on verra cela à l'étape 5)
-api_key = st.secrets.get("GEMINI_API_KEY")
 
+# --- INTERFACE UTILISATEUR ---
+st.set_page_config(page_title="Innoradar", page_icon="🚀", layout="wide")
+
+st.title("InnoRadar")
+st.write("L'outil IA de matchmaking parfait connectant les acteurs du sport aux innovations vraiment utiles.")
+
+
+# CSS pour l'esthétique Glassmorphism et typographie
+st.markdown("""
+    <style>
+    .main { background-color: #000000; }
+    .stButton>button {
+        background: linear-gradient(45deg, #1B1464, #4433FF);
+        color: white;
+        border-radius: 10px;
+        border: none;
+        padding: 10px 24px;
+    }
+    div[data-testid="stSidebar"] {
+        background-color: #0D0D1A;
+        border-right: 1px solid #1B1464;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# 2. Sécurité & Modèle
+api_key = st.secrets.get("GEMINI_API_KEY")
 if not api_key:
-    st.error("Clé API manquante. Veuillez la configurer dans les secrets.")
+    st.error("Clé API manquante. Configurez GEMINI_API_KEY dans les secrets.")
     st.stop()
 
 genai.configure(api_key=api_key)
 
-# --- CONFIGURATION DE LA PERSONNALITÉ ---
+# Configuration selon AI Studio
+generation_config = {
+  "temperature": 0.5,
+  "top_p": 0.9,
+  "top_k": 40,
+  "max_output_tokens": 4000,
+}
+
+# 3. Framework InnoRadar (System Instruction)
 SYSTEM_PROMPT = """
-Prompt de Contexte : Framework InnoRadar
-Identité :
-Tu es l'intelligence centrale d'InnoRadar, une plateforme de matchmaking B2B de classe mondiale dédiée à l'industrie du sport. Ton rôle est de connecter des besoins opérationnels complexes avec des solutions technologiques vérifiées.
-Cible Utilisateur :
-Décideurs de l'écosystème sportif (Clubs pro/amateurs, Ligues, Fédérations, Organisateurs d'événements, Sponsors, Médias).
-Logique Métier (Matchmaking) :
-Diagnostic (3 étapes) : Analyse du profil de l'organisation, identification des goulots d'étranglement (challenges) et définition des KPIs cibles (objectifs).
-Analyse de Pertinence : Comparaison des besoins avec une base de données de +1000 solutions Sport Tech.
-Output Structuré : Chaque recommandation doit inclure :
-Relevance Score (%) : Adéquation stratégique.
-Impact Clé : Gain mesurable (ex: "+20% ROI", "-30% de temps d'attente").
-Audit de Confiance : Score sur 100 basé sur l'ancienneté, les clients références (ex: FIFA, NBA) et la présence digitale.
-Faisabilité : Temps d'implémentation et modèle économique (SaaS, Hardware, etc.).
-L'Assistant Projet IA (Chatbot) :
-Expertise : Consultant expert en Sport Tech.
-Méthodologie : Cadre les projets en 5 questions obligatoires (Objectifs -> Parties prenantes -> Contraintes techniques -> Timeline -> Budget).
-Conversion : Propose systématiquement des solutions spécifiques à la fin du tunnel de questions.
-Produit Signature : Pousse "InnoRadar AI Factory" pour les besoins de développement sur-mesure (IA autonome, RAG, intégration API).
-Ton et Esthétique :
-Ton : Institutionnel, visionnaire, précis, mais accessible.
-Langues : Bilingue parfait (Français/Anglais).
-Univers Visuel : "Dark Mode" premium (Void/Violet/Blue), typographie futuriste (Exo 2), interfaces "Glassmorphism".
-Catégories Clés :
-Performance athlétique, Fan Engagement, Ticketing/Hospitality, Web3/Blockchain, Éco-responsabilité (RSE), Sécurité, Gestion de stade (Venue Management).
+Tu es l'intelligence centrale d'InnoRadar, plateforme de matchmaking B2B Sport Tech.
+TON : Institutionnel, visionnaire, bilingue.
+MÉTHODOLOGIE : 
+1. Pose obligatoirement 5 questions pour cadrer le projet (Objectifs, Parties prenantes, Contraintes, Timeline, Budget).
+2. Pour chaque solution proposée, affiche :
+   - Relevance Score (%)
+   - Impact Clé (KPI chiffré)
+   - Audit de Confiance (X/100)
+   - Faisabilité (Mode éco + temps d'implémentation)
+3. Produit Signature : Si besoin complexe, propose "InnoRadar AI Factory".
 """
 
 model = genai.GenerativeModel(
     model_name='gemini-1.5-flash',
+    generation_config=generation_config,
     system_instruction=SYSTEM_PROMPT
 )
 
-# --- INTERFACE UTILISATEUR ---
-st.set_page_config(page_title="Innoradar", page_icon="🚀")
+# 4. Interface Chat
 
-st.title("🚀InnoRadar")
-st.write("L'outil IA de matchmaking parfait connectant les acteurs du sport aux innovations vraiment utiles.")
-
-# Historique de chat (pour le côté interactif)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Affichage des messages précédents
+# Affichage de l'historique
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Zone de saisie
-if prompt := st.chat_input("Dites quelque chose..."):
-    # Afficher le message utilisateur
+# Input utilisateur
+if prompt := st.chat_input("Décrivez votre besoin ou votre challenge sportif..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Réponse de l'IA
     with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        full_response = ""
-        
-        try:
-            # Appel à Gemini
-            response = model.generate_content(prompt)
-            full_response = response.text
-            message_placeholder.markdown(full_response)
-        except Exception as e:
-            st.error(f"Erreur : {e}")
-            
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
+        response = model.generate_content(prompt)
+        st.markdown(response.text)
+        st.session_state.messages.append({"role": "assistant", "content": response.text})
+
+# 5. Sidebar
+with st.sidebar:
+    st.image("https://via.placeholder.com/150x50/1B1464/FFFFFF?text=INNORADAR", use_container_width=True)
+    st.write("---")
+    st.info("Expertise : Consultant Sport Tech\nMode : Diagnostic & Matchmaking")
+    if st.button("Nouvelle Analyse"):
+        st.session_state.messages = []
+        st.rerun()
