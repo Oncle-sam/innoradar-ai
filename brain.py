@@ -36,30 +36,44 @@ def get_model():
     model = genai.GenerativeModel(model_name=model_name)
     return model, model_name
 
+
+import google.generativeai as genai
+import streamlit as st
+import pandas as pd
+
+# Le Framework définitif
+QUESTIONS = [
+    "quels sont les objectifs prioritaires de votre projet ?",
+    "quelles sont les parties prenantes clés impliquées (Marketing, IT, Staff...) ?",
+    "quels sont les impératifs techniques (CRM, Mobile-First, Wi-Fi...) ?",
+    "quel est votre horizon de déploiement (Prochaine saison, 6 mois...) ?",
+    "quelle est l'enveloppe budgétaire estimée ?"
+]
+
 def generate_response(model, prompt, history):
-    df_solutions = load_solutions()
+    df_solutions = load_solutions() # On garde votre base sécurisée
     
-    # Transformation des solutions en texte pour l'IA
+    # Transformation de la base en texte (Uniquement colonnes publiques)
+    solutions_context = ""
     if not df_solutions.empty:
-        solutions_text = ""
         for _, row in df_solutions.iterrows():
-            solutions_text += f"- {row['Dénomination actuelle']} : {row['Résumé']} (Sport: {row['Sport ciblé']})\n"
-    else:
-        solutions_text = "Aucune donnée disponible."
+            solutions_context += f"- {row['Dénomination actuelle']} : {row['Résumé']} (Sport: {row['Sport ciblé']})\n"
 
     system_instructions = f"""
-    Tu es l'intelligence centrale d'InnoRadar.
+    Tu es l'Expert IA d'InnoRadar.
+    TON PROCESSUS :
+    1. Analyse l'historique pour voir quelles questions parmi les 5 du diagnostic ont été répondues.
+    2. Si le diagnostic est incomplet, remercie l'utilisateur et pose la QUESTION SUIVANTE parmi : {QUESTIONS}.
+    3. Si le diagnostic est terminé, propose un matchmaking basé sur :
+    {solutions_context}
     
-    BASE DE DONNÉES DISPONIBLE :
-    {solutions_text}
-    
-    CONSIGNES :
-    1. Aide l'utilisateur à trouver la meilleure solution Sport Tech.
-    2. Utilise un ton professionnel et expert.
-    3. RELEVANCE SCORE : Attribue un score de 0 à 100% pour chaque recommandation.
-    4. SÉCURITÉ : Ne mentionne jamais de données financières ou privées.
-    5. DOUTE : Si tu doutes du lien entre une solution et le sport, signale-le explicitement.
+    RÈGLES D'OR :
+    - Ton : Institutionnel et expert.
+    - Relevance Score : Obligatoire pour chaque solution.
+    - Doute : Si une solution n'est pas 100% Sport Tech, signale-le.
     """
+    
+    # ... Logique d'envoi Gemini ...
     
     # Construction du prompt avec historique
     history_context = ""
