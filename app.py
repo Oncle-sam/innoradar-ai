@@ -11,7 +11,9 @@ st.write("L'outil IA de matchmaking parfait connectant les acteurs du sport aux 
 
 # Initialisation du modèle
 try:
-    model = get_model()
+
+    model, model_name = get_model()
+st.sidebar.caption(f"Moteur : {model_name}") # Petit bonus pour voir quel modèle a gagné
 except Exception as e:
     st.error(f"Erreur de connexion à l'IA : {e}")
     st.stop()
