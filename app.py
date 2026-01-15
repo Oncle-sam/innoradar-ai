@@ -51,14 +51,6 @@ genai.configure(api_key=api_key)
 # car la bibliothèque l'ajoute parfois d'elle-même selon la version)
 MODEL_NAME = 'gemini-1.5-flash-latest' 
 
-model = genai.GenerativeModel(
-    model_name=MODEL_NAME,
-    generation_config=generation_config,
-    system_instruction=SYSTEM_PROMPT
-)
-
-
-
 # 3. Framework InnoRadar (System Instruction)
 SYSTEM_PROMPT = """
 Tu es l'intelligence centrale d'InnoRadar, plateforme de matchmaking B2B Sport Tech.
@@ -72,6 +64,12 @@ MÉTHODOLOGIE :
    - Faisabilité (Mode éco + temps d'implémentation)
 3. Produit Signature : Si besoin complexe, propose "InnoRadar AI Factory".
 """
+
+model = genai.GenerativeModel(
+    model_name=MODEL_NAME,
+    generation_config=generation_config,
+    system_instruction=SYSTEM_PROMPT
+)
 
 # 4. Interface Chat
 
