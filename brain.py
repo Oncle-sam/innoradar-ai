@@ -45,19 +45,29 @@ def get_model():
     return genai.GenerativeModel(model_name=model_name), model_name
 
 def generate_response(model, prompt, history):
-    # On prépare le contexte avec l'historique pour que l'IA ait de la mémoire
-    context = ""
-    for msg in history[-5:]: # On prend les 5 derniers messages pour la mémoire
-        context += f"{msg['role']}: {msg['content']}\n"
+    # On construit une mémoire textuelle à partir de l'historique du chat
+    memo_context = ""
+    for msg in history:
+        role = "Utilisateur" if msg["role"] == "user" else "InnoRadar"
+        memo_context += f"{role}: {msg['content']}\n"
     
-    full_prompt = f"{SYSTEM_PROMPT}\n\nHistorique récent:\n{context}\n\nUtilisateur: {prompt}"
+    # Le prompt final fusionne : Instructions + Mémoire + Nouvelle Question
+    full_prompt = f"""
+    {SYSTEM_PROMPT}
     
-    # Appel critique : 'model' doit être l'objet, pas le tuple
+    HISTORIQUE DE LA CONVERSATION :
+    {memo_context}
+    
+    DERNIÈRE QUESTION DE L'UTILISATEUR :
+    {prompt}
+    
+    RÉPONSE D'INNORADAR :
+    """
+    
     response = model.generate_content(
         full_prompt,
         generation_config={
-            "temperature": 0.5,
-            "top_p": 0.9,
+            "temperature": 0.7, # Légèrement plus haut pour le conseil stratégique
             "max_output_tokens": 2000,
         }
     )
