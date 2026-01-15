@@ -11,9 +11,11 @@ st.write("L'outil IA de matchmaking parfait connectant les acteurs du sport aux 
 
 # Initialisation du modèle
 try:
+# Modifiez cette ligne pour "déballer" le tuple
+model, model_name = get_model()
 
-    model, model_name = get_model()
-st.sidebar.caption(f"Moteur : {model_name}") # Petit bonus pour voir quel modèle a gagné
+# Optionnel : affichez le modèle actif dans la sidebar pour confirmer que ça marche
+st.sidebar.success(f"IA connectée : {model_name}")
 except Exception as e:
     st.error(f"Erreur de connexion à l'IA : {e}")
     st.stop()
