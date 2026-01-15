@@ -29,6 +29,16 @@ st.markdown("""
 
 
 # 2. Sécurité & Modèle
+
+# Configuration selon AI Studio
+generation_config = {
+  "temperature": 0.5,
+  "top_p": 0.9,
+  "top_k": 40,
+  "max_output_tokens": 4000,
+}
+
+
 api_key = st.secrets.get("GEMINI_API_KEY")
 if not api_key:
     st.error("Clé API manquante. Configurez GEMINI_API_KEY dans les secrets.")
@@ -47,13 +57,7 @@ model = genai.GenerativeModel(
     system_instruction=SYSTEM_PROMPT
 )
 
-# Configuration selon AI Studio
-generation_config = {
-  "temperature": 0.5,
-  "top_p": 0.9,
-  "top_k": 40,
-  "max_output_tokens": 4000,
-}
+
 
 # 3. Framework InnoRadar (System Instruction)
 SYSTEM_PROMPT = """
