@@ -1,39 +1,21 @@
+import google.generativeai as genai
 import streamlit as st
-from styles import apply_styles
-from brain import get_model, generate_response
 
-# Configuration
-st.set_page_config(page_title="Innoradar", page_icon="🚀", layout="wide")
-apply_styles()
+# Diagnostic : Liste des modèles
+st.sidebar.title("🔍 Diagnostic API")
 
-st.title("InnoRadar")
-st.write("L'outil IA de matchmaking parfait connectant les acteurs du sport aux innovations vraiment utiles.")
-
-# Initialisation du modèle
 try:
-# Modifiez cette ligne pour "déballer" le tuple
-    model, model_name = get_model()
-
-# Optionnel : affichez le modèle actif dans la sidebar pour confirmer que ça marche
-    st.sidebar.success(f"IA connectée : {model_name}")
+    api_key = st.secrets.get("GEMINI_API_KEY")
+    genai.configure(api_key=api_key)
+    
+    # Appel à ListModels
+    models = genai.list_models()
+    
+    st.sidebar.write("Modèles autorisés pour votre clé :")
+    for m in models:
+        # On affiche le nom et les méthodes supportées (ex: generateContent)
+        if 'generateContent' in m.supported_generation_methods:
+            st.sidebar.code(m.name) # Affiche le nom exact à copier
+            
 except Exception as e:
-    st.error(f"Erreur de connexion à l'IA : {e}")
-    st.stop()
-
-# Gestion du Chat
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-if prompt := st.chat_input("Posez votre question à InnoRadar..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    with st.chat_message("assistant"):
-        response_text = generate_response(model, prompt, st.session_state.messages)
-        st.markdown(response_text)
-        st.session_state.messages.append({"role": "assistant", "content": response_text})
+    st.sidebar.error(f"Erreur ListModels : {e}")
