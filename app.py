@@ -15,7 +15,7 @@ try:
     model, model_name = get_model()
 
 # Optionnel : affichez le modèle actif dans la sidebar pour confirmer que ça marche
-st.sidebar.success(f"IA connectée : {model_name}")
+    st.sidebar.success(f"IA connectée : {model_name}")
 except Exception as e:
     st.error(f"Erreur de connexion à l'IA : {e}")
     st.stop()
